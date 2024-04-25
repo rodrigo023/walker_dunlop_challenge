@@ -16,3 +16,15 @@ class Preference(PreferenceBase):
 
   class Config:
     from_attributes = True
+
+class Notification(BaseModel):
+  message_ids: list[str]
+
+  class Config:
+    from_attributes = True
+
+class NotificationCreate(BaseModel):
+  payload: str
+
+  class Config:
+    from_attributes = True
