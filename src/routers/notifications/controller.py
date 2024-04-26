@@ -1,17 +1,9 @@
-from fastapi import APIRouter, Depends
+from sqlalchemy import Column, or_
+from ... import models
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
-from ..dependencies import get_db
-from .. import models, schemas
-import boto3
-
-router = APIRouter(dependencies=[Depends(get_db)])
 
 
-@router.post("/notifications/", response_model=schemas.Notification)
-def schedule_notifications(
-    notification_payload: schemas.NotificationCreate, db: Session = Depends(get_db)
-):
+def publish_notifications_to_sns(db: Session, notification_payload: str, sns_topic):
     # Getting data from mocked Users table. This could be a call to another DB or an API
     users_data = (
         db.query(models.Users)
@@ -39,19 +31,23 @@ def schedule_notifications(
         }
         for preferences in users_preferences
     ]
-    sns = boto3.resource("sns", region_name="us-east-1")
-    topic = sns.Topic("arn:aws:sns:us-east-1:421554845588:WDChallenge")
-    response = {}
-    response["message_ids"] = []
-    for notification in notifications_list:
-        messageAttributes = {
-            k: {"StringValue": v, "DataType": "String"}
-            for k, v in notification.items()
-            if v
-        }
-        if len(messageAttributes) > 0:
-            sns_response = topic.publish(
-                Message=notification_payload.payload,
+    return _publish_to_sns(notifications_list, notification_payload, sns_topic)
+
+
+def _publish_to_sns(
+    notifications: list[dict[str, Column[str]]], payload: str, sns_topic
+):
+    response = dict()
+    response["message_ids"] = list()
+    for notification in notifications:
+        if notification["email"] or notification["phone"]:
+            messageAttributes = {
+                k: {"StringValue": v, "DataType": "String"}
+                for k, v in notification.items()
+                if v
+            }
+            sns_response = sns_topic.publish(
+                Message=payload,
                 MessageStructure="string",
                 MessageAttributes=messageAttributes,
             )

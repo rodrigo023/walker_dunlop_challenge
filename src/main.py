@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from .routers import preferences
-from .routers import notifications
+from .routers.preferences import main as preferences
+from .routers.notifications import main as notifications
 from . import models
 
 from .database import engine

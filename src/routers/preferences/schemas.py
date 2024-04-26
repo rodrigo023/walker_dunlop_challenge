@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic_settings import SettingsConfigDict
 
 
 class PreferenceBase(BaseModel):
@@ -16,21 +17,5 @@ class PreferenceUpdate(BaseModel):
 
 
 class Preference(PreferenceBase):
+    model_config = SettingsConfigDict(from_attributes=True)
     user_id: int
-
-    class Config:
-        from_attributes = True
-
-
-class Notification(BaseModel):
-    message_ids: list[str]
-
-    class Config:
-        from_attributes = True
-
-
-class NotificationCreate(BaseModel):
-    payload: str
-
-    class Config:
-        from_attributes = True
