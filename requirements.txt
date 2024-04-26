@@ -1,0 +1,4 @@
+boto3==1.34.91
+fastapi==0.110.2
+pydantic==2.7.1
+SQLAlchemy==2.0.29
