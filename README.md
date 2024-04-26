@@ -18,10 +18,25 @@ Challenge for Walker &amp; Dunlop interview process
 - [API docs](#api-docs)
 
 # Architecture
+![Architecture Diagram](architecture.png)
+The architecture relies on the fan-out pattern. This allows publishing a message to an SNS Topic with multiple SQS Subscriptions.
+Each SQS Subscription has it's own Subscription filter policy so it only consumes the messages concerning to that particular SQS Queue. This mechanism makes possible to, by just publishing a single message to the SNS Topic, have multiple Queues consuming those messages and only processing those that are of interest to each of those Queues.\
+An example of a Subscription filter policy would be:
+ ```json
+{
+  "email": [
+    {
+      "exists": true
+    }
+  ]
+}
+```
+The above filter will take only the messages that are supposed to be sent by Email to the Users.
 
 # Assumptions
 - An external Database or API provides the User data, like Email or Phone. For the sake of simplicity, a User table was created to provide this data.
 - The external source of User's data provides a unique id to identify each user. In this service a user_id is used to match the User's data with the User's preferences.
+- The implementation of the code that sends the Email or SMS notifications is out of scope.
 
 # Limitations
 
