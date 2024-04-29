@@ -19,7 +19,7 @@ Challenge for Walker &amp; Dunlop interview process
 # Architecture
 ![Architecture Diagram](architecture.png)
 The architecture relies on the fan-out pattern. This allows publishing a message to an SNS Topic with multiple SQS Subscriptions.
-Each SQS Subscription has it's own Subscription filter policy so it only consumes the messages concerning to that particular SQS Queue. This mechanism makes possible to, by just publishing a single message to the SNS Topic, have multiple Queues consuming those messages and only processing those that are of interest to each of those Queues.
+Each SNS Subscription has it's own Subscription filter policy so each subscribed SQS Queue only consumes the messages concerning to that particular SQS Queue. This mechanism makes possible to, by just publishing a single message to the SNS Topic, have multiple Queues consuming those messages and only processing those that are of interest to each of those Queues.
 
 An example of a Subscription filter policy for Users with Email enabled would be:
  ```json
@@ -46,6 +46,7 @@ The above filter will take only the messages that are supposed to be sent by Ema
 # Architecture decisions
 - FastAPI was the chosen framework for its improved performance, built-in validation features and the automatic generation of API documentation.
 - For simplicity, AWS SNS and SQS services were used as the event and queuing services.
+- As database PostgreSQL was the selected option for being a free relational database. Other non-relational database options were considered, like DynamoDB, since the simplicity of the data stored for this service makes a good fit for a NoSQL database. Though it might be a more expensive option, the fact that DynamoDB is fully managed and serverless has it's benefits.
 
 # Assumptions
 - An external Database or API provides the User data, like Email or Phone. For the sake of simplicity, a User table was created to provide this data.
@@ -54,7 +55,7 @@ The above filter will take only the messages that are supposed to be sent by Ema
 
 # Known limitations
 - The /notifications/ endpoint only supports sending a message payload. Other useful fields like Subject were not considered.
-- The /notifications/ endpoint doesn't allow for filtering users by criteria other than email or sms enabled. It is not possible to send notification to a subset of users.
+- The /notifications/ endpoint doesn't allow for filtering users by criteria other than Email or SMS enabled. It is not possible to send a notification to a subset of users.
 - There's no way to know if a notification was successfully delivered to each user. 
 
 # Areas for improvement
@@ -62,6 +63,8 @@ The above filter will take only the messages that are supposed to be sent by Ema
 - Define a logging strategy and an appropriate logging library
 - Implement authentication and authorization for the API endpoints. Potentially use RBAC to control which clients can access the /preferences/ endpoints and the /notifications/ endpoint.
 - Run performance tests to validate the /notifications/ endpoint behavior. What happens when sending a notification to thousands of users? Or even millions of users?
+- Improve unit test coverage
+- Include a docker file to easily spin up a database container
 
 # Setup
 ### Prerequisites
